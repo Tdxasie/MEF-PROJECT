@@ -1,0 +1,3 @@
+Compilation:
+
+$ gcc -o test func_test.c fcaltools.c tabtools.c 

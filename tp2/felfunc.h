@@ -1,0 +1,11 @@
+int a11(float *x);
+int a12(float *x);
+int a22(float *x);
+int a00(float *x);
+int bN(float *x);
+int fOmega(float *x);
+int fN(float *x);
+int uD(float *x);
+void W(int nbneel, float *fctbas, float eltdif, float cofvar, float **matelm);
+void WW(int nbneel, float *fctbas, float eltdif, float cofvar, float **matelm);
+void ADWDW(int nbneel, float *fctbas, float eltdif, float cofvar, float **matelm);

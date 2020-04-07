@@ -1,0 +1,14 @@
+# conf
+-> fichier de configuration du maillage, contient les paramètres sous le format suivant:
+0 1 0 1      -> a b c d (float)
+n1 n2        -> nb of points per side (int>0)
+t            -> type of element (int t=1 || int t=2)
+0 1 2 3 4    -> reference numbers : domain, side1, side2, side3, side4 (int)
+
+# mesh_gen.c
+-> génère le fichier de maillage en lisant les paramètres dans le fichier "conf"
+~/$ gcc mesh_gen.c mesh_tools.c tabtools.c -o gen 
+
+# mesh_read.c 
+-> lit le fichier de maillage et met les données en mémoire
+~/$ gcc mesh_read.c mesh_tools.c tabtools.c -o read 
