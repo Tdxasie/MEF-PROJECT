@@ -37,9 +37,9 @@ int uD(float *x){
     return 100*x[0] + x[1];
 }
 
-void W(int nbneel, float *fctbas, float eltdif, float cofvar, float **matelm){
+void W(int nbneel, float *fctbas, float eltdif, float cofvar, float *vecelm){
     for(int i=0; i<nbneel; i++){
-        matelm[i][0] = matelm[i][0]+ eltdif*cofvar*fctbas[i];
+        vecelm[i] = vecelm[i]+ eltdif*cofvar*fctbas[i];
     }
 }
 
@@ -53,14 +53,15 @@ void WW(int nbneel, float *fctbas, float eltdif, float cofvar, float **matelm){
     }
 }
 
-void ADWDW(int nbneel, float **derfctbas, float eltdif, float **cofvar, float **matelm){
-    float coeff;
-    for(int a=0; a<2; a++){
-        for(int b=0; b<2; b++){
-            for(int i=0; i<nbneel; i++){
-                coeff = eltdif*cofvar[a][b]*derfctbas[i][a];
-                for(int j=0; j<nbneel; j++){
-                    matelm[i][j] = matelm[i][j] + coeff*derfctbas[j][b];
+void ADWDW(int nbneel, float **derfctbas, float  **iJac, float eltdif, float **cofvar, float **matelm){
+    float coeff, ci, cj;
+    for(int i=0; i<nbneel; i++){
+        for(int j=0; j<nbneel; j++){
+            for(int a=0; a<2; a++){
+                ci = derfctbas[i][0]*iJac[0][a] + derfctbas[i][1]*iJac[1][a];
+                for(int b=0; b<2; b++){  
+                    cj = derfctbas[j][0]*iJac[0][b] + derfctbas[j][1]*iJac[1][b];
+                    matelm[i][j] = matelm[i][j] + eltdif*cofvar[a][b]*ci*cj;
                 }
             }
         }
@@ -70,9 +71,9 @@ void ADWDW(int nbneel, float **derfctbas, float eltdif, float **cofvar, float **
 void intElem(int t, float *coorEl[]){
     int size = 5-t;
     float *fbase[size];
-    for(int i=0; i<size; i++){
-        calFbase(t, coorEl[i], fbase);
-    }
+    // for(int i=0; i<size; i++){
+    //     calFbase(t, coorEl[i], fbase);
+    // }
     
     // appel de calFbase & calDerFbase
     // matjacob & inverM2x2
@@ -92,28 +93,32 @@ void cal1Elem(int nRefDom, int t, int nbneel, int nbaret,
     //ldfkglm
 }
 
-void lecNumRef(char *numreffile, int *nRefDom,
+int lecNumRef(char *numreffile, int *nRefDom,
                int *nbRefD0, int **numRefD0, int *nbRefD1, int **numRefD1, int *nbRefF1, int **numRefF1){
     FILE *in = NULL;
     in = fopen(numreffile, "r");
     if (in != NULL) {
         fscanf(in, "%d", nRefDom);
         fscanf(in, "%d", nbRefD0);
+        numRefD0 = alloctabint(*nbRefD0, 0);
         for(int i=0; i<*nbRefD0; i++){
             fscanf(in, "%d", numRefD0[i]);
         }
         fscanf(in, "%d", nbRefD1);
+        numRefD1 = alloctabint(*nbRefD1, 0);
         for(int i=0; i<*nbRefD1; i++){
             fscanf(in, "%d", numRefD1[i]);
         }
         fscanf(in, "%d", nbRefF1);
+        numRefF1 = alloctabint(*nbRefF1, 0);
         for(int i=0; i<*nbRefF1; i++){
             fscanf(in, "%d", numRefF1[i]);
         }
         fclose(in);
+        printf("La lecture des numref s'est bien passée\n");
         return 1;
     } else {
-        printf("Erreur lors de l'ouverture du fichier");
+        printf("Erreur lors de l'ouverture du fichier\n");
         return 0;
     }
 }

@@ -4,6 +4,11 @@
 #include<stdlib.h>
 
 void etiqAr(int t, int n1, int n2, int nrefdom, int *nrefcot, int m, int q, int **nRefAr){
+    // m : elemCount
+    // q : edgeCount
+    // n1 : nodeCount on side 1
+    // n1 : nodeCount on side 2
+
     // init mid
     for(int i=0; i<m; i++) { 
         for(int j=0; j<q; j++){
@@ -52,6 +57,14 @@ void etiqAr(int t, int n1, int n2, int nrefdom, int *nrefcot, int m, int q, int 
 }
 
 int lecfima(char *meshfile, int *t, int *n, float ***pcoord, int *m, int ***pngnel, int *p, int *q, int ***pnRefAr){
+    // t : type of el
+    //    1 : quadrangle
+    //    2 : triangle
+    //    3 : line
+    // n : nodeCount
+    // m : elemCount
+    // p : elemNodeCount
+    // q : elemEdgeCount
     
     FILE *in = NULL;
 
