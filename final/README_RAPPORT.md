@@ -1,9 +1,6 @@
-PIERRE GARNIER
+# Rapport projet MEF
 
-
-
-
-
+Compiler avec `gcc *.c *.o -lm -lgfortran`
 
 ## DOMAINE 1: carré [0,1]x[0,1]
 
