@@ -71,12 +71,14 @@ int lecfima(char *meshfile, int *t, int *n, float ***pcoord, int *m, int ***pngn
     in = fopen(meshfile, "r");
 
     if (in != NULL) {
+
+        printf("Lecture du fichier de maillage : %s\n", meshfile);
+
         fscanf(in, "%d", n);
         *pcoord = alloctab(*n, 2);
         for(int i=0; i<*n; i++){
-            fscanf(in, "%f %f", &(*pcoord)[i][0], &(*pcoord)[i][1]);
+            fscanf(in, "%f %f", &((*pcoord)[i][0]), &((*pcoord)[i][1]));
         }
-
         fscanf(in, "%d %d %d %d", m, t, p, q);
 
         *pngnel = alloctabint(*m, *p);

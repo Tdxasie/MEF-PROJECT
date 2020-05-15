@@ -2,68 +2,208 @@
 #include"tabtools.h"
 #include"felfunc.h"
 #include"fcaltools.h"
+#include"forfun.h"
+#include"matrix_storage.h"
+#include"solver.h"
 #include<stdio.h>
 #include<stdlib.h>
+#include<math.h>
 
-int main(int argc, char const *argv[])
-{
-    char * meshfile = "car1x1t_1";
+int main()
+{   
+    float eps = 1e-6;
+
+    // char * meshfile = "d1t1_2";
+    char  meshfile[20];
     char * numreffile = "numref";
+    int out_filename = -1; // negatif pour print dans la console
 
-    int type, elemCount, nodeCount, elemNodeCount, elemEdgeCount;
+    int type, elemCount, elemNodeCount, elemEdgeCount;
 
-	int nRefDom, nbRefD0, nbRefD1, nbRefF1;
-	int *numRefD0, *numRefD1, *numRefF1;
+    int nRefDom, sizeRefD0, sizeRefD1, sizeRefF1;
+    
+    int *numRefD0, *numRefD1, *numRefF1;
 
-    float **coord;
-    float **coorEl;
+    float **nodeCoords;
 
-    int **ngnel, **nRefAr;
+    int **elemGlobalNodeIds;
+    int **elemEdgeRefs;
 
-    int *NuDElem;
-    float *SMbrElem, *uDElem;
-    float **MatElem;
+    int nbLign, nbCoef, coefMax;
 
-    if(lecfima(meshfile, &type, &nodeCount, &coord, &elemCount, &ngnel, &elemNodeCount, &elemEdgeCount, &nRefAr)
-	   &&
-	   lecNumRef(numreffile, &nRefDom, &nbRefD0, &numRefD0, &nbRefD1, &numRefD1, &nbRefF1, &numRefF1)
-       ){
-        printf("Les données sont en mémoire\n");
+    int *colIdx, *firstAdLi, *followingAdLi;
+    int *colIdxO, *firstAdLiO;
 
-        SMbrElem = malloc(elemNodeCount*sizeof(float));
-        NuDElem = malloc(elemNodeCount*sizeof(int));
-        uDElem = malloc(elemNodeCount*sizeof(float));
-        MatElem = alloctab(elemNodeCount, elemNodeCount);
-        coorEl = malloc(elemNodeCount*sizeof(float*));
+    int *NumDlDir;
 
-        for(int i=0; i<nodeCount; i++) printf("%f %f\n", coord[i][0], coord[i][1]); //coord[0] ne semble pas exister, je n'arrive pas à savoir pourquoi 
+    float *Matrix, *SecMembr, *ValDrDir;
+    float *MatrixO, *SecMembrO;
 
-        // for(int i=0; i<elemCount; i++){
-        //     selectPts(elemNodeCount, ngnel[i], coord, coorEl);
-        //     cal1Elem(nRefDom, type, elemNodeCount, elemEdgeCount,
-        //              nbRefD0, numRefD0, nbRefD1, numRefD1, nbRefF1, numRefF1,
-        //              nRefAr[i], coorEl,
-        //              MatElem, SMbrElem, NuDElem, uDElem);
-        //     impCalEl(i, elemNodeCount, type, MatElem, SMbrElem, NuDElem, uDElem);
+    int *Profile;
+
+    float *MatrixP;
+
+    float *U, *UEX;
+
+    nucas = 1;
+
+    omegacas = 1;
+
+    // int domain = 0;
+
+    // int nbMeshFiles;
+    // char *MeshFiles[6];
+
+    printf("Choisissez le numéro d'exemple (1 à 3) : ");
+    scanf("%d", &nucas);
+
+    printf("Que faire (entrez le numéro correspondant à l'option): \n");
+    printf("1. Lire un seul fichier de maillage\n");
+    printf("2. Effectuer une série de calculs sur différentes subdivisions (ne fonctionne pas)\n");
+    printf("Votre choix : ");
+    int choice = 1;
+    scanf("%d", &choice);
+
+    if (choice == 1){
+        printf("Entrez le nom du meshfile : ");
+        scanf("%s", meshfile);
+        
+        // nbMeshFiles = 1;
+        // MeshFiles[0] = meshfile;
+
+    } else if (choice == 2){
+        // printf("Choisissez le domaine : ");
+        // scanf("%d", &domain);
+
+        // char typeStr[1];
+        // printf("Choisissez la forme de la maille (t ou q) : ");
+        // scanf("%s", typeStr);
+
+        // int ordr = 1;
+        // printf("Choisissez l'ordre du maillage (1, 2 indisponible pour le moment) : ");
+        // scanf("%d", &ordr);
+
+        // nbMeshFiles = 6;
+        // for(int i=0; i<nbMeshFiles; i++){
+        //     snprintf(meshfile, 20, "d%d%s%d_%d", domain, typeStr, ordr, (int)pow(2, i+1));
+        //     MeshFiles[i] = meshfile;
+        //     printf(meshfile);
+        //     printf("\n");
         // }
+    }
+    
 
-        free(SMbrElem);
-        free(NuDElem);
-        free(uDElem);
-        free(coorEl);
-        freetab(MatElem);
-
-    } else {
+    if(!lecfima(meshfile, &type, &nbLign, &nodeCoords, &elemCount, &elemGlobalNodeIds, &elemNodeCount, &elemEdgeCount, &elemEdgeRefs)
+	   ||
+	   !lecNumRef(numreffile, &nRefDom, &sizeRefD0, &numRefD0, &sizeRefD1, &numRefD1, &sizeRefF1, &numRefF1)
+       ){
         printf("Erreur lors de la lecture du meshfile ou du numreffile, verifier le formatage\n");
+        exit(1);
     }
 
-    freetab(coord);
-    freetab(ngnel);
-    freetab(nRefAr);
+    printf("\n\x1B[32mLes données sont en mémoire \x1B[0m \n");
+
+    nbCoef = (nbLign*nbLign - nbLign)/2;
+
+    /*
+    -------------------------------------------------------------------------------------------------------
+            Assemblage
+    -------------------------------------------------------------------------------------------------------
+    */
+
+    firstAdLi = calloc(nbLign, sizeof(int));
+    SecMembr  = calloc(nbLign, sizeof(float));
+    NumDlDir  = calloc(nbLign, sizeof(int));
+    ValDrDir  = calloc(nbLign, sizeof(float));
+
+    colIdx         = calloc(nbCoef, sizeof(int));
+    followingAdLi  = calloc(nbCoef, sizeof(int));
+    Matrix         = calloc(nbCoef+nbLign, sizeof(float));
+
+    assemble(type, elemCount, elemNodeCount, elemEdgeCount,
+             elemGlobalNodeIds, nodeCoords, elemEdgeRefs,
+             nRefDom, sizeRefD0, numRefD0, sizeRefD1, numRefD1, sizeRefF1, numRefF1,
+             nbLign, nbCoef,
+             SecMembr, NumDlDir, ValDrDir, firstAdLi, Matrix, colIdx, followingAdLi);
 
     free(numRefD0);
     free(numRefD1);
     free(numRefF1);
+
+    freetab(elemGlobalNodeIds);
+    freetab(elemEdgeRefs);
+
+    /*
+    -------------------------------------------------------------------------------------------------------
+            Stockage des matrices & conversions
+    -------------------------------------------------------------------------------------------------------
+    */
+    
+    exportSMD("SMD_export", nbLign, SecMembr, NumDlDir, ValDrDir, firstAdLi, Matrix, colIdx, followingAdLi);
+
+    // affsmd_(&nbLign, firstAdLi, colIdx, followingAdLi, Matrix, SecMembr, NumDlDir, ValDrDir);
+
+    // importSMD("SMD_export", &nbLign, &SecMembr, &NumDlDir, &ValDrDir, &firstAdLi, &Matrix, &colIdx, &followingAdLi);
+
+    // affsmd_(&nbLign, firstAdLi, colIdx, followingAdLi, Matrix, SecMembr, NumDlDir, ValDrDir);
+
+    firstAdLiO = calloc(nbLign, sizeof(int));
+    SecMembrO = calloc(nbLign, sizeof(float));
+
+    nbCoef = firstAdLi[nbLign-1]-1;
+
+    colIdxO = calloc(nbCoef, sizeof(int));
+    MatrixO = calloc(nbLign+nbCoef, sizeof(float));
+
+    SMDtoSMO("SMO_export", nbLign, firstAdLi, colIdx, followingAdLi, NumDlDir, ValDrDir, Matrix, SecMembr, 
+             firstAdLiO, colIdxO, MatrixO, SecMembrO);
+
+    free(NumDlDir);
+    free(SecMembr);
+    free(ValDrDir);
+    free(colIdx);
+    free(Matrix);
+    free(firstAdLi);
+    free(followingAdLi);
+
+    //importSMO("SMO_export", &nbLign, &SecMembrO, &firstAdLiO, &MatrixO, &colIdxO);
+
+    // affsmo_(&nbLign, firstAdLiO, colIdxO, MatrixO, SecMembrO);
+
+    coefMax = (nbLign*nbLign - nbLign)/2;
+
+    Profile = calloc(nbLign, sizeof(int));
+    MatrixP = calloc(nbLign+coefMax, sizeof(float));
+
+    SMOtoPR(nbLign, coefMax, firstAdLiO, colIdxO, MatrixO, Profile, MatrixP);
+
+    free(colIdxO);
+    free(MatrixO);
+    free(firstAdLiO);
+
+    /*
+    -------------------------------------------------------------------------------------------------------
+            Calcul le la solution
+    -------------------------------------------------------------------------------------------------------
+    */
+
+    U = calloc(nbLign, sizeof(float));
+
+    CholeskyResol(nbLign, Profile, MatrixP, SecMembrO, eps, U);
+
+    free(Profile);
+    free(MatrixP);
+
+    UEX = calloc(nbLign, sizeof(float));
+
+    CalSol(nbLign, nodeCoords, UEX);
+
+    affsol_(&nbLign, nodeCoords[0], U, UEX, &out_filename);
+
+    free(U);
+    free(UEX);
+
+    freetab(nodeCoords);
 
     return 0;
 }

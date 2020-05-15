@@ -7,3 +7,4 @@ void matJacob(int nb, int d, float *coords[], float **derfbase, float **jacob);
 void invertM2x2(float **mat, float **inv, float *det);
 void numNaret(int t, int side, int *num);
 void selectPts(int nb, int num[], float *coordEns[], float *coordSel[]);
+float norm2(float **jacob);

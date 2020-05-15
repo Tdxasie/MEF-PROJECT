@@ -4,7 +4,6 @@
 
 float **alloctab(int dim1, int dim2) {
     float **ptr;
-
     ptr = malloc(dim1*sizeof(float *));
     if (ptr != NULL) {
         int i, taille_ligne = dim2*sizeof(float);

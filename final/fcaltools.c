@@ -2,6 +2,7 @@
 #include"tabtools.h"
 #include<stdio.h>
 #include<stdlib.h>
+#include<math.h>
 
 int getQ(int t){
     switch (t)
@@ -83,7 +84,7 @@ void calDerFbase(int t, float *coords, float **derfbase){ //type int * for retur
     switch (t)
     {
     case 1:
-        derfbase[0][0] = (1-coords[1]) ; derfbase[0][1] = -coords[0];
+        derfbase[0][0] = 1-coords[1]   ; derfbase[0][1] = -coords[0];
         derfbase[1][0] =  coords[1]    ; derfbase[1][1] = coords[0];
         derfbase[2][0] = -coords[1]    ; derfbase[2][1] = 1-coords[0];
         derfbase[3][0] =  coords[1]-1  ; derfbase[3][1] = coords[0]-1;
@@ -114,11 +115,11 @@ void transFK(int nb, float *coords[], float *fbase, float *im){
 }
 
 void matJacob(int nb, int d, float *coords[], float **derfbase, float **jacob){
-    for(int k=0; k<d; k++){
-        for(int j=0; j<2; j++){
+    for(int j=0; j<2; j++){
+        for(int k=0; k<d; k++){
             jacob[j][k] = 0;
             for(int i=0; i<nb; i++){
-                jacob[j][k] += coords[i][k] * derfbase[i][k];
+                jacob[j][k] += coords[i][j] * derfbase[i][k];
             }
         }
     }
@@ -167,4 +168,9 @@ void selectPts(int nb, int num[], float *coordEns[], float *coordSel[]){
     for(int i=0; i<nb; i++){
         coordSel[i] = coordEns[num[i]-1];
     }
+}
+
+float norm2(float **jacob){
+    // return sqrt(pow(jacob[0][0], 2) + pow(jacob[1][0], 2));
+    return sqrt(jacob[0][0]*jacob[0][0] + jacob[1][0]*jacob[1][0]);
 }

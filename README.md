@@ -46,6 +46,24 @@ Mesh file :
 
 ## TP3 - Assemblage
 
+    Assemblage -> A -> stockée sous forme SMD
+
+    SMD:
+        ¤ NbLign : nb de lignes et colonnes dans la matrice A
+        
+        ¤ NbCoef : nb d'éléments non nuls dans la partie inférieure stricte de A
+        
+        ¤ Matrice (float *) : contient tous les coefficients de la partie inférieure
+            
+            Matrice = [diag1, ..., diagN, coef1, ..., coefN]
+                      |  <--DiagMat-->   |  <--LowMat-->   |
+        
+        ¤ AdPrCoefLi (int *) l=NbLign : pos dans LowMat du premier coef non nul de chaque ligne
+            AdPrCoefLi(NbLign) = NbCoef+1
+            AdPrCoefLi(I-1) = 0 si aucun élément sur ligne I
+
+        ¤  
+
 ## TP4 - Système linéaire
 
 ## TP5 - Résolution + exploitation
