@@ -23,19 +23,19 @@ On s'attarde principalement sur le premier exemple.
 
 Pour un maillage en triangles on a:
 
-    | Intervalles de subdivision | Erreur quadratique relative | Erreur maximum relative|
-    |----------------------------|-----------------------------|------------------------|
-    | 2                          | 0.166666627                 | 0.166666627            |
-    | 4                          | 0.478788316                 | 0.503116250            |
-    | 8                          | 
+| Intervalles de subdivision | Erreur quadratique relative | Erreur maximum relative|
+|----------------------------|-----------------------------|------------------------|
+| 2                          | 0.166666627                 | 0.166666627            |
+| 4                          | 0.478788316                 | 0.503116250            |
+| 8                          | 
 
 Pour un maillage en quadrangles on a:
 
-    | Intervalles de subdivision | Erreur quadratique relative | Erreur maximum relative|
-    |----------------------------|-----------------------------|------------------------|
-    | 2                          | 0.249999881                 | 0.249999881            |
-    | 4                          |                             |                        |
-    | 8                          | 
+| Intervalles de subdivision | Erreur quadratique relative | Erreur maximum relative|
+|----------------------------|-----------------------------|------------------------|
+| 2                          | 0.249999881                 | 0.249999881            |
+| 4                          |                             |                        |
+| 8                          | 
 
 Une interprétation des données est presque ridicule, on aurait tendance à dire que l'erreur augmente avec le nombre de subdivisions
 mais avec deux points mais avec seulement deux points c'est difficile à dire.
