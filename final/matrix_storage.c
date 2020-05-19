@@ -156,7 +156,7 @@ int importSMO(char *filename, int *nblign,
         fclose(in);
 
     } else {
-        printf("\x1B[31mErreur lors de l'ouverture du fichier SMD_export\n\x1B[0m");
+        printf("\x1B[31mErreur lors de l'ouverture du fichier SMO_export\n\x1B[0m");
         return 0;
     }
     return 1;
@@ -168,36 +168,23 @@ void SMOtoPR(int nblign, int coefMax, int *firstAdLiO, int *colIdxO, float *Matr
     
     for(int i=nblign; i<nblign+coefMax; i++) MatrixP[i] = 0.0;
 
-    int lign, maxAdditions, addedThisLine, col, totalAdded = 0, offset = 0, ind = 0;
+    int elOnLign;
+    
+    Profile[0] = 1;
 
-    for(lign=0; lign<nblign; lign++){
-        //add el to profile
-        Profile[lign] = firstAdLiO[lign]+offset; //account for the zeros added
-        maxAdditions = lign+1; //maximum number of additions possible on that lign i.e lign length
-        
+    for(int i = 1; i < nblign; i++){
+        if (firstAdLiO[i-1] == firstAdLiO[i]){
+            Profile[i] = Profile[i-1];
+        } else {
+            elOnLign = i+1 - colIdxO[firstAdLiO[i-1]-1]; // lign - col of first el = elOnLign
+            Profile[i] = Profile[i-1] + elOnLign;
 
-        // for example a line like this |0A0B00| 
-        // colIdx at this stage is :    [ 2 4  ]
-        // elsToAdd is 2
-        // matrixP need to have :       [ A0B00]       
-
-        addedThisLine = 0;
-        for(col=1; col<=maxAdditions; col++){
-            if (col == colIdxO[totalAdded]){                    //we're here |0A0B00| -> add the elements
-                                                                //           |-#-#--|
-                ind = totalAdded+offset;                        // offset accounting for the eventual zeros
-                MatrixP[nblign+ind] = MatrixO[nblign+totalAdded];
-                
-                totalAdded++;
-                addedThisLine++;
-            } else if (addedThisLine > 0){                      //we're here |0A0B00| -> fill the gaps with zeros
-                                                                //           |--#-##|
-                //add zero
-                offset++;
-            } else {                                            //we're here |0A0B00| -> don't add anything
-                                                                //           |#-----|
-                //do nothing
-            }
+            for(int k = firstAdLiO[i-1]; k < firstAdLiO[i]; k++){
+ 				MatrixP[nblign + Profile[i] + colIdxO[k-1]-i-2] = MatrixO[nblign+k-1]; //it just works
+  		    }
         }
     }
+    MatrixP[nblign + Profile[nblign-1] - 1] = MatrixO[nblign + firstAdLiO[nblign-1]-1]; //last el 
+
+
 }

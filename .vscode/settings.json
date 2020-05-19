@@ -3,6 +3,7 @@
         "mesh.h": "c",
         "stdlib.h": "c",
         "mesh_tools.h": "c",
-        "fcaltools.h": "c"
+        "fcaltools.h": "c",
+        "typeinfo": "c"
     }
 }

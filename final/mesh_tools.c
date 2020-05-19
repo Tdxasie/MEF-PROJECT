@@ -72,7 +72,7 @@ int lecfima(char *meshfile, int *t, int *n, float ***pcoord, int *m, int ***pngn
 
     if (in != NULL) {
 
-        printf("Lecture du fichier de maillage : %s\n", meshfile);
+        printf("\n\nLecture du fichier de maillage : %s\n", meshfile);
 
         fscanf(in, "%d", n);
         *pcoord = alloctab(*n, 2);
@@ -101,10 +101,10 @@ int lecfima(char *meshfile, int *t, int *n, float ***pcoord, int *m, int ***pngn
             break;
         }
         fclose(in);
-        printf("La lecture du meshfile s'est bien passée\n");
+        printf("\x1B[32mLa lecture du meshfile s'est bien passée \x1B[0m \n");
         return 1;
     } else {
-        printf("Erreur lors de l'ouverture du fichier\n");
+        printf("\x1B[31mErreur lors de l'ouverture du fichier\x1B[0m\n");
         return 0;
     }
 }

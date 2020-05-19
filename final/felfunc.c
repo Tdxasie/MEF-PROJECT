@@ -401,7 +401,7 @@ int assemble(int type, int elemCount, int elemNodeCount, int elemEdgeCount,
                     sizeRefD0, numRefD0, sizeRefD1, numRefD1, sizeRefF1, numRefF1,
                     elemEdgeRefs[k], elemNodeCoords,
                     MatElem, SMbrElem, NuDElem, uDElem);
-        impCalEl(k, elemNodeCount, type, MatElem, SMbrElem, NuDElem, uDElem);
+        // impCalEl(k, elemNodeCount, type, MatElem, SMbrElem, NuDElem, uDElem);
 
         for(int i=0; i<elemNodeCount; i++){
             I = elemGlobalNodeIds[k][i]-1; //optimisation des opérations sans avoir à créer une nouvelle variable pour I-1
